@@ -1,0 +1,31 @@
+# Dependencias y archivos locales
+node_modules/
+.env
+.env.*
+!.env.example
+.netlify/
+.openai/
+.DS_Store
+Thumbs.db
+*.log
+coverage/
+playwright-report/
+test-results/
+
+# Respaldos, exportaciones y sesiones: nunca versionar
+backups/
+respaldos/
+*.xlsx
+*.xls
+*.csv
+*.dump
+*.backup
+*.sql.gz
+*.zip
+*.har
+*storageState*.json
+Abrir-Mis-Gastos.html
+
+# Copias SQL con información de usuarios
+*backup*.sql
+*dump*.sql

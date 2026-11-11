@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {equivalents,filterExpenses,total,dailyAverage,validExpense} from '../dist/core.js';
+const a={date:'2026-11-22',country:'España',city:'Madrid',category:'Alimentación',description:'Café',amount:10,currency:'EUR',rate:4500,payment:'Tarjeta',payer_id:'a',created_at:'2026-11-22T10:00:00Z'};
+const b={...a,date:'2026-11-24',amount:90000,currency:'COP',rate:4500,payer_id:'b',city:'París',country:'Francia',payment:'Efectivo'};
+test('EUR y COP se normalizan con la tasa histórica por gasto',()=>{assert.deepEqual(equivalents(a),{EUR:10,COP:45000});assert.equal(total([a,b],'EUR'),30);assert.equal(total([a,b],'COP'),135000);assert.equal(total([a,{...b,rate:9000}],'EUR'),20)});
+test('filtros combinados no mezclan viajeros ni ciudades',()=>{assert.equal(filterExpenses([a,b],{country:'Francia',city:'París',payment:'Efectivo',payer_id:'b',from:'2026-11-24',to:'2026-11-24',category:'Alimentación',search:'café'}).length,1);assert.equal(filterExpenses([a,b],{city:'Madrid',payer_id:'b'}).length,0)});
+test('promedio incluye días intermedios y vacío',()=>{assert.equal(dailyAverage([a,b],'EUR'),10);assert.equal(dailyAverage([],'EUR'),0)});
+test('validación de cantidades y monedas',()=>{assert.ok(validExpense(a));for(const e of [{amount:0},{amount:-1},{rate:0},{rate:NaN},{currency:'USD'},{city:' '},{description:''},{amount:Infinity}])assert.equal(validExpense({...a,...e}),false)});
+test('orden de fecha descendente',()=>assert.equal(filterExpenses([a,b])[0].city,'París'));
+
+test('países de nuevos destinos y fechas reales del viaje',async()=>{const {validTrip}=await import('../dist/core.js');const t={name:'Italia 2027',start_date:'2027-02-01',end_date:'2027-02-15',countries:['Italia'],rate:4200};assert.equal(validTrip(t),true);assert.equal(validTrip({...t,start_date:'2027-02-30'}),false);assert.equal(validTrip({...t,end_date:'2027-01-01'}),false);assert.equal(validTrip({...t,countries:[]}),false);assert.equal(validTrip({...t,name:' '}),false)});

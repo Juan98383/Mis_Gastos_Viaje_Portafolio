@@ -1,0 +1,11 @@
+export const categories=['Alimentación','Transporte','Hospedaje','Compras','Entretenimiento','Turismo','Supermercado','Salud','Otros'];
+export const colors=['#d79b58','#749d8a','#7a8db0','#b4889b','#d7bb71','#82b8ba','#9eac73','#c78173','#9b9e9c'];
+export function equivalents(e){const a=Number(e.amount),r=Number(e.rate);return {EUR:e.currency==='EUR'?a:a/r,COP:e.currency==='COP'?a:a*r}}
+export function filterExpenses(rows,f={}){return rows.filter(e=>(!f.from||e.date>=f.from)&&(!f.to||e.date<=f.to)&&['country','city','payer_id','payment','category'].every(k=>!f[k]||e[k]===f[k])&&(!f.search||[e.description,e.city,e.category,e.notes].join(' ').toLocaleLowerCase('es').includes(f.search.toLocaleLowerCase('es')))).sort((a,b)=>b.date.localeCompare(a.date)||b.created_at.localeCompare(a.created_at))}
+export function aggregate(rows,key,currency){return rows.reduce((a,e)=>{const k=e[key];a[k]=(a[k]||0)+equivalents(e)[currency];return a},Object.create(null))}
+export function total(rows,currency){return rows.reduce((a,e)=>a+equivalents(e)[currency],0)}
+export function dailyAverage(rows,currency){if(!rows.length)return 0;const days=rows.map(e=>e.date).sort();return total(rows,currency)/(1+Math.round((Date.parse(days.at(-1))-Date.parse(days[0]))/86400000))}
+export function validExpense(e){return Number.isFinite(e.amount)&&e.amount>0&&e.amount<=1e12&&Number.isFinite(e.rate)&&e.rate>0&&e.rate<=1e9&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&typeof e.country==='string'&&e.country.trim().length>0&&e.country.length<=80&&categories.includes(e.category)&&['EUR','COP'].includes(e.currency)&&['Efectivo','Tarjeta'].includes(e.payment)&&e.description.trim().length>0&&e.description.length<=160&&e.city.trim().length>0&&e.city.length<=80}
+
+export function validTrip(t){return typeof t.name==='string'&&t.name.trim().length>0&&t.name.trim().length<=100&&validDate(t.start_date)&&validDate(t.end_date)&&t.end_date>=t.start_date&&Array.isArray(t.countries)&&t.countries.length>0&&t.countries.length<=30&&t.countries.every(c=>typeof c==='string'&&c.trim().length>0&&c.length<=80)&&Number.isFinite(t.rate)&&t.rate>0&&t.rate<=1e9}
+export function validDate(value){return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value}

@@ -1,0 +1,16 @@
+{
+  "name": "mis-gastos-viaje-portafolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser/demo.cjs",
+    "check:publish": "node scripts/check-publish.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1",
+    "exceljs": "4.4.0"
+  }
+}
